@@ -3,6 +3,6 @@
     xmlns="sap.m">
     <Panel headerText="{i18n>Orders}"
             class="sapUiResponsiveMargin"
-            width="auto" >
+            width="auto">
     </Panel>
 </mvc:View>
