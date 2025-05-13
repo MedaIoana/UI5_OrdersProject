@@ -4,6 +4,10 @@
 	xmlns="sap.m"
 	xmlns:mvc="sap.ui.core.mvc">
 
-	<App id="app" />
+	<Shell>
+		<App class="myOrdersApp" 
+			 id="app">
+		</App>
+	</Shell>
 
 </mvc:View>
