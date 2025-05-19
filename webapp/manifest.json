@@ -52,17 +52,14 @@
 				"type": "sap.ui.model.resource.ResourceModel",
 				"settings": {
 					"bundleName": "ui5training.i18n.i18n",
-					"supportedLocales": [
-						"en",
-						"de"
-					],
+					"supportedLocales": ["en", "de"],
 					"fallbackLocale": "en",
 					"async": true
 				}
 			},
 			"": {
-			  "dataSource": "mainService",
-			  "settings": {}
+				"dataSource": "mainService",
+				"settings": {}
 			}
 		},
 		"routing": {
@@ -86,6 +83,13 @@
 					"viewName": "Main"
 				}
 			}
+		},
+		"resources": {
+			"css": [
+				{
+					"uri": "css/style.css"
+				}
+			]
 		}
 	}
 }
