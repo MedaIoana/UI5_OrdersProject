@@ -1,0 +1,56 @@
+<mvc:View controllerName="ui5training.controller.Create"
+    xmlns:mvc="sap.ui.core.mvc" 
+    displayBlock="true"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+
+    <Wizard id="wizardId" complete="onWizardCompleted">
+        <WizardStep id="firstWizardStep" title="{i18n>SelectCustomer}">
+		    <ComboBox
+				items="{/Customers}">
+				<core:Item key="{CustomerID}" text="{ContactName}" />
+			</ComboBox>
+        </WizardStep>
+
+        <WizardStep id="secondWizardStep" title="{i18n>SelectProduct}">
+            <Table 
+                id="selectProducts"
+                class="sapUiResponsiveMargin"
+                width="auto" 
+                items="{/Products}"
+                mode="MultiSelect">
+                <headerToolbar>
+                    <Toolbar>
+                        <ToolbarSpacer/>
+                        <SearchField
+                            width="50%"
+                            search=".onSearchProducts"/>
+                    </Toolbar>
+                </headerToolbar>
+                <columns>
+                    <Column><Text text="{i18n>ProductId}"/></Column>
+                    <Column><Text text="{i18n>ProductName}"/></Column>
+                    <Column><Text text="{i18n>QuantityPerUnit}"/></Column>
+                    <Column><Text text="{i18n>CategoryName}"/></Column>
+                    <Column><Text text="{i18n>UnitPrice}"/></Column>
+                </columns>
+                <items>
+                    <ColumnListItem>
+                        <cells>
+                            <Text text="{ProductID}"/>
+                            <Text text="{ProductName}"/>
+                            <Text text="{QuantityPerUnit}"/>
+                            <Text text="{Category/CategoryName}"/>
+                            <Text text="{UnitPrice}"/>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+
+            </Table>
+        </WizardStep>
+
+        <WizardStep id="thirdWizardStep" title="{i18n>OrderOverview}">
+        </WizardStep>
+    </Wizard>
+
+</mvc:View>

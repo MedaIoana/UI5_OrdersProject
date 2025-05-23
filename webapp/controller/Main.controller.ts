@@ -7,6 +7,8 @@ import FilterOperator from "sap/ui/model/FilterOperator";
 import ListBinding from "sap/ui/model/ListBinding";
 import type Table from "sap/m/Table";
 import Event from "sap/ui/base/Event";
+import UIComponent from "sap/ui/core/UIComponent";
+import ObjectListItem from "sap/m/ObjectListItem";
 
 /**
  * @namespace ui5training.controller
@@ -49,7 +51,7 @@ export default class Main extends BaseController {
 		var oSelected = oTable.getSelectedItems();
 
 		if (oSelected.length === 0) {
-			MessageBox.show("No items selected.");
+			MessageBox.show(this.getResourceBundle().getText("NoSelection"));
 			return;
 		}
 
@@ -60,20 +62,37 @@ export default class Main extends BaseController {
 			const sPath = oContext.getPath(); // e.g. "/Orders(10248)"
 			const oData = oModel.getProperty(sPath); // full object data
 
-			console.log("Selected data:", oData);
-
-			// Optional: delete from model
 			oModel.remove(sPath, {
 				success: () => {
-					MessageBox.show(`Deleted item at ${sPath}`);
+					MessageBox.show(
+						this.getResourceBundle().getText("Deleted") + ` ${sPath}`
+					);
 				},
 				error: (err: any) => {
-					console.error("Failed to delete item", err);
+					// MessageBox.show(
+					// 	this.getResourceBundle().getText("DeletedFailed") + ` ${sPath}`, err
+					// );
+					console.error("Failed to delete item" + ` ${sPath}`, err);
 				},
 			});
 		});
-
-		// Optionally clear selection after delete
 		oTable.removeSelections();
+	}
+
+	onCreateItem(event: Event): void {
+		const oRouter = UIComponent.getRouterFor(this);
+		oRouter.navTo("create");
+	}
+
+	onPress(event: Event): void {
+		// const item = event.getSource() as ObjectListItem;
+
+		const oRouter = UIComponent.getRouterFor(this);
+		oRouter.navTo("orderView");
+		// , {
+		// 	orderPath: window.encodeURIComponent(
+		// 		item.getBindingContext("").getPath().substring(1)
+		// 	),
+		// });
 	}
 }

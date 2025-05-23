@@ -13,7 +13,7 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-define(["require", "exports", "sap/m/MessageBox", "./BaseController", "sap/ui/model/Filter", "sap/ui/model/FilterOperator"], function (require, exports, MessageBox_1, BaseController_1, Filter_1, FilterOperator_1) {
+define(["require", "exports", "sap/m/MessageBox", "./BaseController", "sap/ui/model/Filter", "sap/ui/model/FilterOperator", "sap/ui/core/UIComponent"], function (require, exports, MessageBox_1, BaseController_1, Filter_1, FilterOperator_1, UIComponent_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     /**
@@ -49,36 +49,37 @@ define(["require", "exports", "sap/m/MessageBox", "./BaseController", "sap/ui/mo
             binding === null || binding === void 0 ? void 0 : binding.filter(filter);
         };
         Main.prototype.onDeleteItems = function (event) {
+            var _this = this;
             var oTable = this.byId("ordersView");
-            var oModel = oTable.getModel();
-            var aData = oModel.getProperty("/Orders"); // all data
-            if (!Array.isArray(aData)) {
-                MessageBox_1.default.error("Model data '/Orders' is not available or is not an array.");
+            var oModel = this.getView().getModel();
+            var oSelected = oTable.getSelectedItems();
+            if (oSelected.length === 0) {
+                MessageBox_1.default.show(this.getResourceBundle().getText("NoSelection"));
                 return;
             }
-            var aSelectedItems = oTable.getSelectedItems();
-            if (aSelectedItems.length === 0) {
-                MessageBox_1.default.error("Please select items to delete.");
-                return;
-            }
-            // Get indexes of selected items
-            var aIndexesToDelete = aSelectedItems.map(function (oItem) {
-                return oTable.indexOfItem(oItem);
+            oSelected.forEach(function (oItem) {
+                var oContext = oItem.getBindingContext(); // get context for the item
+                if (!oContext)
+                    return;
+                var sPath = oContext.getPath(); // e.g. "/Orders(10248)"
+                var oData = oModel.getProperty(sPath); // full object data
+                oModel.remove(sPath, {
+                    success: function () {
+                        MessageBox_1.default.show(_this.getResourceBundle().getText("Deleted") + " ".concat(sPath));
+                    },
+                    error: function (err) {
+                        // MessageBox.show(
+                        // 	this.getResourceBundle().getText("DeletedFailed") + ` ${sPath}`, err
+                        // );
+                        console.error("Failed to delete item" + " ".concat(sPath), err);
+                    },
+                });
             });
-            aIndexesToDelete.sort(function (a, b) { return b - a; }); // Delete from highest to lowest
-            // Modify the data directly
-            aIndexesToDelete.forEach(function (iIndex) {
-                aData.splice(iIndex, 1);
-            });
-            // Update the model with modified array
-            oModel.setProperty("/Orders", aData);
-            // Clear selection and update checkbox if needed
             oTable.removeSelections();
-            var oSelectAllCheckbox = this.byId("selectAllCheckbox");
-            if (oSelectAllCheckbox) {
-                oSelectAllCheckbox.setSelected(false);
-            }
-            MessageBox_1.default.show("Selected items deleted.");
+        };
+        Main.prototype.onCreateItem = function (event) {
+            var oRouter = UIComponent_1.default.getRouterFor(this);
+            oRouter.navTo("create");
         };
         return Main;
     }(BaseController_1.default));
