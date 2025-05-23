@@ -75,12 +75,30 @@
 					"pattern": "",
 					"name": "main",
 					"target": "main"
+				},
+				{
+					"pattern": "create",
+					"name": "create",
+					"target": "create"
+				},
+				{
+					"pattern": "orderView",
+					"name": "orderView",
+					"target": "orderView"
 				}
 			],
 			"targets": {
 				"main": {
 					"viewId": "main",
 					"viewName": "Main"
+				},
+				"create": {
+					"viewId": "create",
+					"viewName": "Create"
+				},
+				"orderView": {
+					"viewId": "orderView",
+					"viewName": "OrderView"
 				}
 			}
 		},

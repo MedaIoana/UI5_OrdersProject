@@ -14,18 +14,20 @@
                 <SearchField
                     width="50%"
                     search=".onSearchOrders"/>
-                <Button text="Create" press="onCreateItem" icon="sap-icon://add" />
-                <Button text="Delete Selected" press="onDeleteItems" icon="sap-icon://delete" />
+                <Button text="{i18n>Create}" press="onCreateItem" icon="sap-icon://add" />
+                <Button text="{i18n>DeleteSelected}" press="onDeleteItems" icon="sap-icon://delete" />
             </Toolbar>
         </headerToolbar>
         <columns>
-            <Column><Text text="Order ID"/></Column>
-            <Column><Text text="Customer"/></Column>
-            <Column><Text text="Employee"/></Column>
-            <Column><Text text="Shipper"/></Column>
+            <Column><Text text="{i18n>OrderId}"/></Column>
+            <Column><Text text="{i18n>Customer}"/></Column>
+            <Column><Text text="{i18n>Employee}"/></Column>
+            <Column><Text text="{i18n>Shipper}"/></Column>
         </columns>
         <items>
-            <ColumnListItem>
+            <ColumnListItem
+                type="Navigation"
+                press=".onPress">
                 <cells>
                     <Text text="{OrderID}"/>
                     <Text text="{Customer/CompanyName}"/>
