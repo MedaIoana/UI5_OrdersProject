@@ -1,7 +1,92 @@
 <mvc:View controllerName="ui5training.controller.OrderView"
     xmlns:mvc="sap.ui.core.mvc" 
     displayBlock="true"
-    xmlns="sap.m">
-    
+    xmlns="sap.m">   
+    <Page
+        title="{i18n>OrderDetails}"
+        showNavButton="true"
+        navButtonPress=".onNavBack">
 
+        <ObjectHeader
+                title="Order #{OrderID}"
+                number="{orderDetailsModel>/orderTotal}"
+                numberUnit="$"
+                responsive="true"
+                class="sapUiResponsivePadding--header"
+            >
+                <attributes>
+                    <ObjectAttribute
+                        title="{i18n>Employee}"
+                        text="{Employee/FirstName} {Employee/LastName}"
+                    />
+                    <ObjectAttribute
+                        title="{i18n>CompanyName}"
+                        text="{Customer/CompanyName}"
+                    />
+                    <ObjectAttribute
+                        title="{i18n>Shipper}"
+                        text="{Shipper/CompanyName}"
+                    />
+                    <ObjectAttribute
+                        title="{i18n>ShipName}"
+                        text="{ShipName}"
+                    />
+                    <ObjectAttribute
+                        title="{i18n>ShipAddress}"
+                        text="{= ${ShipCountry} + ', ' + ${ShipCity} }"
+                    />
+                    <ObjectAttribute
+                        title=""
+                        text="{ShipAddress}"
+                    />
+                </attributes>
+            </ObjectHeader>
+
+            <Table
+                id="idOrderDetailsTable"
+                items="{orderDetailsModel>/items}"
+                inset="false"
+                class="sapUiResponsiveMargin"
+                width="auto"
+                alternateRowColors="true"
+                sticky="ColumnHeaders,GroupHeaders">
+                <columns>
+                    <Column>
+                        <Text text="{i18n>ProductName}" />
+                    </Column>
+                    <Column>
+                        <Text text="{i18n>Supplier}" />
+                    </Column>
+                    <Column>
+                        <Text text="{i18n>Quantity}" />
+                    </Column>
+                    <Column>
+                        <Text text="{i18n>UnitPrice}" />
+                    </Column>
+                    <Column>
+                        <Text text="{i18n>TotalPrice}" />
+                        <footer>
+                            <ObjectNumber
+                                number="{orderDetailsModel>/orderTotal}"
+                                unit="$"
+                                state="Success"
+                            />
+                        </footer>
+                    </Column>
+                </columns>
+
+                <items>
+                    <ColumnListItem>
+                        <cells>
+                            <Text text="{orderDetailsModel>Product/ProductName}" />
+                            <Text
+                                text="{orderDetailsModel>Product/Supplier/CompanyName} ({orderDetailsModel>Product/Supplier/Country})" />
+                            <Text text="{orderDetailsModel>Quantity}" />
+                            <Text text="{orderDetailsModel>UnitPrice}" />
+                            <Text text="{orderDetailsModel>TotalAmount} $" />
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+    </Page>
 </mvc:View>

@@ -6,6 +6,14 @@ define(["require", "exports", "sap/ui/model/json/JSONModel", "sap/ui/model/Bindi
             var oModel = new JSONModel_1.default(Device_1.default);
             oModel.setDefaultBindingMode(BindingMode_1.default.OneWay);
             return oModel;
-        }
+        },
+        createViewModel: function () {
+            var oModel = new JSONModel_1.default({
+                step: 0,
+                selectedProducts: [],
+                totalPrice: 0,
+            });
+            return oModel;
+        },
     };
 });

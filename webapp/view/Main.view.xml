@@ -2,39 +2,43 @@
     xmlns:mvc="sap.ui.core.mvc" 
     displayBlock="true"
     xmlns="sap.m">
-    <Table 
-        id="ordersView"
-        class="sapUiResponsiveMargin"
-        width="auto" 
-        items="{/Orders}"
-        mode="MultiSelect">
-        <headerToolbar>
-            <Toolbar>
-                <ToolbarSpacer/>
-                <SearchField
-                    width="50%"
-                    search=".onSearchOrders"/>
-                <Button text="{i18n>Create}" press="onCreateItem" icon="sap-icon://add" />
-                <Button text="{i18n>DeleteSelected}" press="onDeleteItems" icon="sap-icon://delete" />
-            </Toolbar>
-        </headerToolbar>
-        <columns>
-            <Column><Text text="{i18n>OrderId}"/></Column>
-            <Column><Text text="{i18n>Customer}"/></Column>
-            <Column><Text text="{i18n>Employee}"/></Column>
-            <Column><Text text="{i18n>Shipper}"/></Column>
-        </columns>
-        <items>
-            <ColumnListItem
-                type="Navigation"
-                press=".onPress">
-                <cells>
-                    <Text text="{OrderID}"/>
-                    <Text text="{Customer/CompanyName}"/>
-                    <Text text="{Employee/LastName}"/>
-                    <Text text="{Shipper/CompanyName}"/>
-                </cells>
-            </ColumnListItem>
-        </items>
-    </Table>
+    <ScrollContainer height="42rem" horizontal="false" vertical="true">
+        <Table 
+            id="ordersView"
+            class="sapUiResponsiveMargin"
+            width="auto" 
+            items="{/Orders}"
+            selectionChange="onSelectionChange"
+            mode="MultiSelect"
+            sticky="ColumnHeaders,GroupHeaders">
+            <headerToolbar>
+                <Toolbar>
+                    <ToolbarSpacer/>
+                    <SearchField
+                        width="50%"
+                        search=".onSearchOrders"/>
+                    <Button text="{i18n>Create}" press="onCreateItem" icon="sap-icon://add" />
+                    <Button id="deleteButton" text="{i18n>DeleteSelected}" press="onDeleteItems" icon="sap-icon://delete" enabled="false" />
+                </Toolbar>
+            </headerToolbar>
+            <columns>
+                <Column><Text text="{i18n>OrderId}"/></Column>
+                <Column><Text text="{i18n>Customer}"/></Column>
+                <Column><Text text="{i18n>Employee}"/></Column>
+                <Column><Text text="{i18n>Shipper}"/></Column>
+            </columns>
+            <items>
+                <ColumnListItem
+                    type="Navigation"
+                    press=".onPress">
+                    <cells>
+                        <Text text="{OrderID}"/>
+                        <Text text="{Customer/CompanyName}"/>
+                        <Text text="{Employee/LastName}"/>
+                        <Text text="{Shipper/CompanyName}"/>
+                    </cells>
+                </ColumnListItem>
+            </items>
+        </Table>
+    </ScrollContainer>
 </mvc:View>

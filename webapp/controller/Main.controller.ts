@@ -8,7 +8,9 @@ import ListBinding from "sap/ui/model/ListBinding";
 import type Table from "sap/m/Table";
 import Event from "sap/ui/base/Event";
 import UIComponent from "sap/ui/core/UIComponent";
-import ObjectListItem from "sap/m/ObjectListItem";
+import ColumnListItem from "sap/m/ColumnListItem";
+import Button from "sap/m/Button";
+import ResourceModel from "sap/ui/model/resource/ResourceModel";
 
 /**
  * @namespace ui5training.controller
@@ -45,38 +47,49 @@ export default class Main extends BaseController {
 		binding?.filter(filter);
 	}
 
-	onDeleteItems(event: Event): void {
-		var oTable = this.byId("ordersView") as Table;
-		var oModel = this.getView().getModel() as ODataModel;
-		var oSelected = oTable.getSelectedItems();
+	async onDeleteItems(event: Event): Promise<void> {
+		const oTable = this.byId("ordersView") as Table;
+		const oModel = this.getView().getModel() as ODataModel;
+		const oSelected = oTable.getSelectedItems();
+
+		const i18nModel = this.getView().getModel("i18n") as ResourceModel;
+		const bundle = await i18nModel.getResourceBundle();
 
 		if (oSelected.length === 0) {
-			MessageBox.show(this.getResourceBundle().getText("NoSelection"));
+			MessageBox.information(bundle.getText("NoSelection"));
 			return;
 		}
 
-		oSelected.forEach((oItem) => {
-			const oContext = oItem.getBindingContext(); // get context for the item
-			if (!oContext) return;
+		const deletePromises = oSelected.map((oItem) => {
+			const oContext = oItem.getBindingContext();
+			if (!oContext) return Promise.resolve();
 
-			const sPath = oContext.getPath(); // e.g. "/Orders(10248)"
-			const oData = oModel.getProperty(sPath); // full object data
+			const sPath = oContext.getPath();
 
-			oModel.remove(sPath, {
-				success: () => {
-					MessageBox.show(
-						this.getResourceBundle().getText("Deleted") + ` ${sPath}`
-					);
-				},
-				error: (err: any) => {
-					// MessageBox.show(
-					// 	this.getResourceBundle().getText("DeletedFailed") + ` ${sPath}`, err
-					// );
-					console.error("Failed to delete item" + ` ${sPath}`, err);
-				},
+			return new Promise<void>((resolve, reject) => {
+				oModel.remove(sPath, {
+					success: () => resolve(),
+					error: (err: any) => reject({ path: sPath, error: err }),
+				});
 			});
 		});
-		oTable.removeSelections();
+
+		Promise.allSettled(deletePromises).then((results) => {
+			const failed = results.filter((r) => r.status === "rejected");
+			const successCount = results.length - failed.length;
+
+			if (successCount > 0) {
+				MessageBox.success(bundle.getText("Deleted") + ` ${successCount}`);
+			}
+
+			if (failed.length > 0) {
+				const failedPaths = failed.map((r: any) => r.reason.path).join(", ");
+				MessageBox.error(bundle.getText("DeletedFailed") + `: ${failedPaths}`);
+			}
+
+			oTable.removeSelections();
+			this.onSelectionChange();
+		});
 	}
 
 	onCreateItem(event: Event): void {
@@ -84,15 +97,28 @@ export default class Main extends BaseController {
 		oRouter.navTo("create");
 	}
 
-	onPress(event: Event): void {
-		// const item = event.getSource() as ObjectListItem;
+	onPress(oEvent: Event): void {
+		const oSelectedItem = oEvent.getSource() as ColumnListItem;
+		const oContext = oSelectedItem.getBindingContext();
+
+		let oOrder: any = oContext.getObject();
+		let orderId = String(oOrder.OrderID);
 
 		const oRouter = UIComponent.getRouterFor(this);
-		oRouter.navTo("orderView");
-		// , {
-		// 	orderPath: window.encodeURIComponent(
-		// 		item.getBindingContext("").getPath().substring(1)
-		// 	),
-		// });
+		oRouter.navTo("orderView", {
+			orderId: orderId,
+		});
+	}
+
+	onSelectionChange(): void {
+		var oTable = this.byId("ordersView") as Table;
+		var oSelected = oTable.getSelectedItems();
+		const oButton = this.byId("deleteButton") as Button;
+
+		if (oSelected.length > 0) {
+			oButton.setEnabled();
+		} else {
+			oButton.setEnabled(false);
+		}
 	}
 }
