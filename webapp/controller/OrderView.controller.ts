@@ -5,6 +5,8 @@ import ODataModel from "sap/ui/model/odata/v2/ODataModel";
 import Filter from "sap/ui/model/Filter";
 import FilterOperator from "sap/ui/model/FilterOperator";
 import JSONModel from "sap/ui/model/json/JSONModel";
+import { SearchField$SearchEvent } from "sap/m/SearchField";
+import ListBinding from "sap/ui/model/ListBinding";
 
 /**
  * @namespace ui5training.controller
@@ -68,5 +70,37 @@ export default class OrederView extends BaseController {
 			const router = UIComponent.getRouterFor(this);
 			router.navTo("main", {}, true);
 		}
+	}
+
+	onSearchProducts(event: SearchField$SearchEvent): void {
+		// const oView = this.getView();
+		// const oModel = oView.getModel("orderDetailsModel") as ODataModel;
+		// build filter array
+		const filter = [];
+		const query = event.getParameter("query");
+
+		if (query) {
+			const filters = [
+				new Filter("Product/ProductName", FilterOperator.Contains, query),
+				new Filter(
+					"Product/Supplier/CompanyName",
+					FilterOperator.Contains,
+					query
+				),
+			];
+
+			// Combine filters using OR
+			filter.push(
+				new Filter({
+					filters: filters,
+					and: false,
+				})
+			);
+		}
+
+		// filter binding
+		const list = this.byId("idOrderDetailsTable");
+		const binding = list?.getBinding("items") as ListBinding;
+		binding?.filter(filter);
 	}
 }

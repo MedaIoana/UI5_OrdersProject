@@ -50,6 +50,14 @@
                 width="auto"
                 alternateRowColors="true"
                 sticky="ColumnHeaders,GroupHeaders">
+                <headerToolbar>
+                    <Toolbar>
+                        <ToolbarSpacer />
+                        <SearchField
+                            width="50%"
+                            search=".onSearchProducts"/>
+                    </Toolbar>
+                </headerToolbar>
                 <columns>
                     <Column>
                         <Text text="{i18n>ProductName}" />

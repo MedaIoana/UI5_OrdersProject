@@ -32,9 +32,6 @@ export default class Create extends BaseController {
 		const oRouter = this.getRouter();
 		oRouter.getRoute("create").attachMatched(this.onRouteMatched, this);
 
-		// Handle browser back button
-		// this._handleBackNavigationBound = this._handleBackNavigation.bind(this);
-		// window.addEventListener("popstate", this._handleBackNavigationBound);
 		window.addEventListener("popstate", (event) => {
 			event.preventDefault();
 			// event.returnValue = "";
@@ -45,9 +42,6 @@ export default class Create extends BaseController {
 	}
 
 	onExit(): void {
-		// if (this._handleBackNavigationBound) {
-		// 	window.removeEventListener("popstate", this._handleBackNavigationBound);
-		// }
 		console.log();
 	}
 
@@ -148,6 +142,25 @@ export default class Create extends BaseController {
 								oComboBox.setSelectedKey("");
 							} else if (iToIndex === 1) {
 								oViewModel.setProperty("/step", iToIndex);
+								const oTable = this.byId("selectProducts") as Table;
+								const aSelectedContexts = oTable.getSelectedContexts();
+								const aSelectedProducts: SelectedProduct[] =
+									aSelectedContexts.map((ctx) => {
+										const product = ctx.getObject() as SelectedProduct;
+										const quantity = "1"; // Because Quantity is a string in my model
+
+										return {
+											...product,
+											Quantity: quantity,
+											TotalPrice: parseFloat(
+												(
+													parseFloat(product.UnitPrice) * parseFloat(quantity)
+												).toFixed(2)
+											),
+										};
+									});
+
+								this._selectedProducts = aSelectedProducts;
 							}
 						}
 					},
@@ -407,16 +420,6 @@ export default class Create extends BaseController {
 				},
 			}
 		);
-		// };
-
-		// if (
-		// 	oResourceBundleOrPromise &&
-		// 	typeof (oResourceBundleOrPromise as Promise<any>).then === "function"
-		// ) {
-		// 	(oResourceBundleOrPromise as Promise<any>).then(handleConfirm);
-		// } else {
-		// 	handleConfirm(oResourceBundleOrPromise);
-		// }
 	}
 
 	onSubmit(): void {
@@ -488,15 +491,6 @@ export default class Create extends BaseController {
 		const oResourceModel = this.getView().getModel("i18n") as ResourceModel;
 		const oResourceBundleOrPromise = oResourceModel?.getResourceBundle() as any;
 
-		//const handleConfirm = (oResourceBundle: any) => {
-		// MessageBox.confirm(
-		// 	oResourceBundleOrPromise?.getText("cancelConfirmationText"),
-		// 	{
-		// 		title: oResourceBundleOrPromise?.getText("cancelMessasgeBoxTitle"),
-		// 		actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
-		// 		emphasizedAction: MessageBox.Action.OK,
-		// 		onClose: (sAction: string) => {
-		// 			if (sAction === MessageBox.Action.OK) {
 		oModel.remove(oView.getBindingContext().getPath(), {
 			success: () => {
 				console.log("Order deleted successfully.");
@@ -517,22 +511,5 @@ export default class Create extends BaseController {
 				console.log("Failed to delete order.");
 			},
 		});
-		// 			} else {
-		// 				// Prevent going back if canceled
-		// 				history.pushState(null, "", location.href);
-		// 			}
-		// 		},
-		// 	}
-		// );
-		//};
-
-		// if (
-		// 	oResourceBundleOrPromise
-		// 	// typeof (oResourceBundleOrPromise as Promise<any>).then === "function"
-		// ) {
-		// 	(oResourceBundleOrPromise as Promise<any>).then(handleConfirm);
-		// } else {
-		// 	handleConfirm(oResourceBundleOrPromise);
-		// }
 	}
 }
