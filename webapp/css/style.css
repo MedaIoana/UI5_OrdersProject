@@ -1,3 +1,11 @@
 html[dir="ltr"] .myOrdersApp {
 	margin-right: 0.125rem;
 }
+#orderOverviewBox {
+	max-width: 900px;
+	width: 100%;
+}
+.myCompactForm {
+	max-width: 900px;
+	margin: 0 auto;
+}

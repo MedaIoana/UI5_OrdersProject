@@ -32,6 +32,7 @@ define(["require", "exports", "sap/ui/core/UIComponent", "./model/models", "sap/
             _super.prototype.init.call(this);
             // create the device model
             this.setModel(models_1.default.createDeviceModel(), "device");
+            this.setModel(models_1.default.createViewModel(), "viewModelButtons");
             // create the views based on the url/hash
             this.getRouter().initialize();
         };
@@ -44,7 +45,8 @@ define(["require", "exports", "sap/ui/core/UIComponent", "./model/models", "sap/
         Component.prototype.getContentDensityClass = function () {
             if (this.contentDensityClass === undefined) {
                 // check whether FLP has already set the content density class; do nothing in this case
-                if (document.body.classList.contains("sapUiSizeCozy") || document.body.classList.contains("sapUiSizeCompact")) {
+                if (document.body.classList.contains("sapUiSizeCozy") ||
+                    document.body.classList.contains("sapUiSizeCompact")) {
                     this.contentDensityClass = "";
                 }
                 else if (!Device_1.default.support.touch) {
@@ -60,7 +62,7 @@ define(["require", "exports", "sap/ui/core/UIComponent", "./model/models", "sap/
         };
         Component.metadata = {
             manifest: "json",
-            interfaces: ["sap.ui.core.IAsyncContentCreation"]
+            interfaces: ["sap.ui.core.IAsyncContentCreation"],
         };
         return Component;
     }(UIComponent_1.default));

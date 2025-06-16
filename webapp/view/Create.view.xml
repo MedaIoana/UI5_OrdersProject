@@ -1,56 +1,208 @@
-<mvc:View controllerName="ui5training.controller.Create"
-    xmlns:mvc="sap.ui.core.mvc" 
-    displayBlock="true"
+<mvc:View
+    controllerName="ui5training.controller.Create"
     xmlns="sap.m"
-    xmlns:core="sap.ui.core">
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core"
+    xmlns:l="sap.ui.layout"
+    xmlns:f="sap.ui.layout.form">
+    <Page>
+        <content>
+            <Wizard
+                id="wizardId"
+                complete="onWizardCompleted"
+                stepActivate="onWizardStepActivated"
+                navigationChange="navigationChange"
+                showNextButton="false">
+                <WizardStep
+                    id="firstWizardStep"
+                    title="{i18n>SelectCustomer}"
+                    validated="false">
+                    <ComboBox
+                        id="selectCustomer"
+                        items="{/Customers}"
+                        selectionChange=".onCustomerSelected">
+                        <core:Item
+                            key="{CustomerID}"
+                            text="{ContactName}"
+                            additionalText="{CompanyName}, {Country}"/>
+                    </ComboBox>
+                </WizardStep>
 
-    <Wizard id="wizardId" complete="onWizardCompleted">
-        <WizardStep id="firstWizardStep" title="{i18n>SelectCustomer}">
-		    <ComboBox
-				items="{/Customers}">
-				<core:Item key="{CustomerID}" text="{ContactName}" />
-			</ComboBox>
-        </WizardStep>
+                <WizardStep
+                    id="secondWizardStep"
+                    title="{i18n>SelectProduct}"
+                    validated="false">
+                    <Table
+                        id="selectProducts"
+                        class="sapUiResponsiveMargin"
+                        width="auto"
+                        items="{/Products}"
+                        mode="MultiSelect"
+                        selectionChange=".onProductSelect"
+                        sticky="ColumnHeaders,GroupHeaders">
+                        <headerToolbar>
+                            <Toolbar>
+                                <ToolbarSpacer />
+                                <SearchField
+                                    width="50%"
+                                    search=".onSearchProducts"/>
+                            </Toolbar>
+                        </headerToolbar>
+                        <columns>
+                            <Column>
+                                <Text text="{i18n>ProductId}" />
+                            </Column>
+                            <Column>
+                                <Text text="{i18n>ProductName}" />
+                            </Column>
+                            <Column>
+                                <Text text="{i18n>QuantityPerUnit}" />
+                            </Column>
+                            <Column>
+                                <Text text="{i18n>CategoryName}" />
+                            </Column>
+                            <Column>
+                                <Text text="{i18n>UnitPrice}" />
+                            </Column>
+                        </columns>
+                        <items>
+                            <ColumnListItem>
+                                <cells>
+                                    <Text text="{ProductID}" />
+                                    <Text text="{ProductName}" />
+                                    <Text text="{QuantityPerUnit}" />
+                                    <Text text="{Category/CategoryName}" />
+                                    <Text text="{UnitPrice}" />
+                                </cells>
+                            </ColumnListItem>
+                        </items>
+                    </Table>
+                </WizardStep>
 
-        <WizardStep id="secondWizardStep" title="{i18n>SelectProduct}">
-            <Table 
-                id="selectProducts"
-                class="sapUiResponsiveMargin"
-                width="auto" 
-                items="{/Products}"
-                mode="MultiSelect">
-                <headerToolbar>
-                    <Toolbar>
-                        <ToolbarSpacer/>
-                        <SearchField
-                            width="50%"
-                            search=".onSearchProducts"/>
-                    </Toolbar>
-                </headerToolbar>
-                <columns>
-                    <Column><Text text="{i18n>ProductId}"/></Column>
-                    <Column><Text text="{i18n>ProductName}"/></Column>
-                    <Column><Text text="{i18n>QuantityPerUnit}"/></Column>
-                    <Column><Text text="{i18n>CategoryName}"/></Column>
-                    <Column><Text text="{i18n>UnitPrice}"/></Column>
-                </columns>
-                <items>
-                    <ColumnListItem>
-                        <cells>
-                            <Text text="{ProductID}"/>
-                            <Text text="{ProductName}"/>
-                            <Text text="{QuantityPerUnit}"/>
-                            <Text text="{Category/CategoryName}"/>
-                            <Text text="{UnitPrice}"/>
-                        </cells>
-                    </ColumnListItem>
-                </items>
+                <WizardStep
+                    id="thirdWizardStep"
+                    title="{i18n>OrderOverview}"
+                    activate="onOverviewStepActivated">
+                    <HBox justifyContent="Center" width="100%" >
+                        <VBox
+                            id="orderOverviewBox"
+                            class="sapUiSmallMargin">
+                            <f:SimpleForm
+                                id="FormToolbar"
+                                editable="true"
+                                layout="ResponsiveGridLayout"
+                                labelSpanXL="2"
+                                labelSpanL="2"
+                                labelSpanM="3"
+                                labelSpanS="12"
+                                columnsXL="2"
+                                columnsL="2"
+                                columnsM="2"
+                                singleContainerFullSize="false"
+                                class="myCompactForm">
+                                <f:content>
+                                    <!-- Order Header -->
+                                    <core:Title text="" />
+                                    <Label text="{i18n>OrderId}" />
+                                    <Text text="{OrderID}" />
 
-            </Table>
-        </WizardStep>
+                                    <Label text="{i18n>Company}" />
+                                    <Text text="{customerData>/CompanyName}" />
 
-        <WizardStep id="thirdWizardStep" title="{i18n>OrderOverview}">
-        </WizardStep>
-    </Wizard>
+                                    <Label text="{i18n>City}" />
+                                    <Text text="{customerData>/City}" />
 
+                                    <!-- Customer Details -->
+                                    <core:Title text="" />
+                                    <Label text="{i18n>Country}" />
+                                    <Text text="{customerData>/Country}" />
+
+                                    <Label text="{i18n>Phone}" />
+                                    <Text text="{customerData>/Phone}" />
+                                </f:content>
+                            </f:SimpleForm>
+
+                            <!-- Product Info -->
+
+                            <ScrollContainer
+                                height="25rem"
+                                horizontal="false"
+                                vertical="true"
+                                justifyContent="Center"
+                                class="sapUiSmallMargin"
+                                alignItems="Center">
+                                <Table
+                                    id="selectedProducts"
+                                    inset="false"
+                                    class="sapUiResponsiveMargin"
+                                    width="80%"
+                                    alternateRowColors="true"
+                                    growing="true"
+                                    growingScrollToLoad="true"
+                                    sticky="ColumnHeaders,GroupHeaders">
+                                    <columns>
+                                        <Column width="8rem">
+                                            <Text
+                                                text="{i18n>ProductName}"
+                                                wrapping="true"/>
+                                        </Column>
+                                        <Column width="10rem">
+                                            <Text
+                                                text="{i18n>CategoryName}"
+                                                wrapping="true"/>
+                                        </Column>
+                                        <Column width="10rem">
+                                            <Text
+                                                text="{i18n>CategoryDescription}"
+                                                wrapping="true"/>
+                                        </Column>
+                                        <Column width="8rem">
+                                            <Text
+                                                text="{i18n>UnitPrice}"
+                                                wrapping="true"/>
+                                        </Column>
+                                        <Column width="8rem">
+                                            <Text
+                                                text="{i18n>QuantityPerUnit}"
+                                                wrapping="true"/>
+                                        </Column>
+                                        <Column width="8rem">
+                                            <Text text="{i18n>Quantity}" />
+                                        </Column>
+                                        <Column  width="8rem">
+                                            <Text text="{i18n>totalPrice}" />
+                                            <footer>
+                                                <ObjectNumber
+                                                    number="{
+                                                        path: 'viewModel>/totalPrice',
+                                                        formatter: '.formatter.toFixed2'
+                                                    }"
+                                                    unit="$"
+                                                    state="Success" />
+                                            </footer>
+                                        </Column>
+                                    </columns>
+                                </Table>
+                            </ScrollContainer>
+                        </VBox>
+                    </HBox>
+                </WizardStep>
+            </Wizard>
+        </content>
+        <footer>
+            <ToolBar>
+                <ToolbarSpacer />
+                <Button id="nextBtn" text="{i18n>nextBtnText}" visible="{= ${viewModelButtons>/step} === 1 }" press="onNext" />
+                <Button
+                    id="submitBtn"
+                    text="{i18n>submitBtnText}"
+                    visible="{= ${viewModelButtons>/step} === 2 }"
+                    press="onSubmit"/>
+                <Button
+                    id="cancelBtn"
+                    text="{i18n>cancelBtnText}"
+                    press="onCancel"/>
+            </ToolBar>
+        </footer>
+    </Page>
 </mvc:View>

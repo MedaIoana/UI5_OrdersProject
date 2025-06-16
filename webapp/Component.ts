@@ -9,27 +9,25 @@ import { initMockServer } from "./model/mockServer";
 export default class Component extends UIComponent {
 	public static metadata = {
 		manifest: "json",
-		interfaces: ["sap.ui.core.IAsyncContentCreation"]
+		interfaces: ["sap.ui.core.IAsyncContentCreation"],
 	};
 
 	private contentDensityClass: string;
 
 	public init(): void {
-
 		// if (location.hostname === "localhost") {
 		// 	initMockServer();
 		// }
-		
+
 		// call the base component's init function
 		super.init();
 
 		// create the device model
 		this.setModel(models.createDeviceModel(), "device");
+		this.setModel(models.createViewModel(), "viewModelButtons");
 
 		// create the views based on the url/hash
 		this.getRouter().initialize();
-
-		
 	}
 
 	/**
@@ -41,7 +39,10 @@ export default class Component extends UIComponent {
 	public getContentDensityClass(): string {
 		if (this.contentDensityClass === undefined) {
 			// check whether FLP has already set the content density class; do nothing in this case
-			if (document.body.classList.contains("sapUiSizeCozy") || document.body.classList.contains("sapUiSizeCompact")) {
+			if (
+				document.body.classList.contains("sapUiSizeCozy") ||
+				document.body.classList.contains("sapUiSizeCompact")
+			) {
 				this.contentDensityClass = "";
 			} else if (!Device.support.touch) {
 				// apply "compact" mode if touch is not supported
