@@ -73,9 +73,6 @@ export default class OrederView extends BaseController {
 	}
 
 	onSearchProducts(event: SearchField$SearchEvent): void {
-		// const oView = this.getView();
-		// const oModel = oView.getModel("orderDetailsModel") as ODataModel;
-		// build filter array
 		const filter = [];
 		const query = event.getParameter("query");
 

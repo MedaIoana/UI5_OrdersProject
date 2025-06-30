@@ -1,6 +1,6 @@
 import ColumnListItem from "sap/m/ColumnListItem";
 import ComboBox from "sap/m/ComboBox";
-import { SearchField$SearchEvent } from "sap/m/SearchField";
+import SearchField, { SearchField$SearchEvent } from "sap/m/SearchField";
 import StepInput from "sap/m/StepInput";
 import Table from "sap/m/Table";
 import Text from "sap/m/Text";
@@ -18,6 +18,7 @@ import ResourceModel from "sap/ui/model/resource/ResourceModel";
 import { OrderDetails } from "ui5training/model/orderDetails";
 import { SelectedProduct } from "ui5training/model/product";
 import ResourceBundle from "sap/base/i18n/ResourceBundle";
+import Button from "sap/m/Button";
 
 /**
  * @namespace ui5training.controller
@@ -45,7 +46,7 @@ export default class Create extends BaseController {
 		console.log();
 	}
 
-	onRouteMatched(oEvent: any): void {
+	onRouteMatched(): void {
 		const oView = this.getView();
 		const oModel = oView.getModel() as ODataModel;
 		this.isSubmitNav = false; // Reset flag on route match
@@ -84,16 +85,9 @@ export default class Create extends BaseController {
 					OrderID: oData.OrderID,
 				});
 
-				oView.bindElement(sPath, {
-					success: (oData: any) => {
-						console.log("success binding");
-					},
-					error: (oResponse: any) => {
-						console.log("failed binding");
-					},
-				});
+				oView.bindElement(sPath);
 			},
-			error: (oResponse: any) => {
+			error: () => {
 				console.log("Failed to create order.");
 			},
 		});
@@ -138,29 +132,52 @@ export default class Create extends BaseController {
 								oViewModel.setProperty("/step", iToIndex);
 								this._selectedProducts = [];
 
+								const oSearchField = this.byId("searchproducts") as SearchField;
+
+								const oTable = this.byId("selectProducts") as Table;
+								// Reset search input
+								oSearchField.setValue("");
+								// Clear any filters from the product table
+								const oBinding = oTable.getBinding("items");
+								if (oBinding) {
+									(oBinding as ListBinding).filter([]);
+								}
+
 								const oComboBox = this.byId("selectCustomer") as ComboBox;
 								oComboBox.setSelectedKey("");
 							} else if (iToIndex === 1) {
 								oViewModel.setProperty("/step", iToIndex);
+
 								const oTable = this.byId("selectProducts") as Table;
-								const aSelectedContexts = oTable.getSelectedContexts();
-								const aSelectedProducts: SelectedProduct[] =
-									aSelectedContexts.map((ctx) => {
-										const product = ctx.getObject() as SelectedProduct;
-										const quantity = "1"; // Because Quantity is a string in my model
 
-										return {
-											...product,
-											Quantity: quantity,
-											TotalPrice: parseFloat(
-												(
-													parseFloat(product.UnitPrice) * parseFloat(quantity)
-												).toFixed(2)
-											),
-										};
-									});
+								const oSearchField = this.byId("searchproducts") as SearchField;
 
-								this._selectedProducts = aSelectedProducts;
+								// Reset search input
+								oSearchField.setValue("");
+								// Clear any filters from the product table
+								const oBinding = oTable.getBinding("items");
+								if (oBinding) {
+									(oBinding as ListBinding).filter([]);
+								}
+
+								const aItems = oTable.getItems();
+
+								// Clear all selections first
+								oTable.removeSelections(true);
+
+								// Reselect only products that still exist in _selectedProducts
+								aItems.forEach((item) => {
+									const context = item.getBindingContext();
+									const product = context?.getObject() as SelectedProduct;
+
+									const isStillSelected = this._selectedProducts.some(
+										(p) => p.ProductID === product.ProductID
+									);
+
+									if (isStillSelected) {
+										oTable.setSelectedItem(item, true); // second param = fireEvent
+									}
+								});
 							}
 						}
 					},
@@ -275,7 +292,6 @@ export default class Create extends BaseController {
 			const oNextStep = oWizard.getProgressStep();
 			const iNextIndex = oWizard.getSteps().indexOf(oNextStep);
 			oViewModelButtons.setProperty("/step", iNextIndex);
-			console.log();
 		} else {
 			oWizard.invalidateStep(oCurrentStep);
 		}
@@ -362,6 +378,11 @@ export default class Create extends BaseController {
 						max: "{viewModel>UnitsInStock}",
 						change: (oEvent) => this._onQuantityChange(oEvent),
 					}),
+					new Button({
+						icon: "sap-icon://delete",
+						type: "Reject",
+						press: (oEvent) => this._onDeleteProduct(oEvent),
+					}),
 					new Text({
 						text: "{= (Number(${viewModel>UnitPrice} || 0) * Number(${viewModel>Quantity} || 0)).toFixed(2) + ' $'}",
 					}),
@@ -396,14 +417,7 @@ export default class Create extends BaseController {
 				emphasizedAction: MessageBox.Action.OK,
 				onClose: (sAction: string) => {
 					if (sAction === MessageBox.Action.OK) {
-						oModel.remove(oView.getBindingContext().getPath(), {
-							success: () => {
-								console.log();
-							},
-							error: () => {
-								console.log();
-							},
-						});
+						oModel.remove(oView.getBindingContext().getPath());
 
 						oWizard.discardProgress(oWizard.getSteps()[0], false);
 
@@ -455,7 +469,7 @@ export default class Create extends BaseController {
 					},
 				};
 				oModel.create("/Order_Details", oOrderDetail, {
-					success: (oData: any) => {
+					success: () => {
 						const oCurrentStep = this.byId(
 							oWizard.getCurrentStep()
 						) as WizardStep;
@@ -493,7 +507,6 @@ export default class Create extends BaseController {
 
 		oModel.remove(oView.getBindingContext().getPath(), {
 			success: () => {
-				console.log("Order deleted successfully.");
 				oWizard.discardProgress(oWizard.getSteps()[0], false);
 
 				const oComboBox = this.byId("selectCustomer") as ComboBox;
@@ -507,9 +520,34 @@ export default class Create extends BaseController {
 				// Avoid staying on create page after cancel via back
 				oRouter.navTo("main");
 			},
-			error: () => {
-				console.log("Failed to delete order.");
-			},
+			error: () => {},
 		});
+	}
+
+	private _onDeleteProduct(oEvent: any): void {
+		const oButton = oEvent.getSource();
+		const oItem = oButton.getParent(); // ColumnListItem
+		const oContext = oItem.getBindingContext("viewModel");
+		const oProduct = oContext.getObject() as SelectedProduct;
+
+		const oModel = this.getView().getModel("viewModel") as JSONModel;
+		let aProducts = oModel.getProperty(
+			"/selectedProducts"
+		) as SelectedProduct[];
+
+		// Remove from model
+		aProducts = aProducts.filter((p) => p.ProductID !== oProduct.ProductID);
+		oModel.setProperty("/selectedProducts", aProducts);
+
+		// Recalculate total
+		const total = aProducts.reduce(
+			(sum, p) => sum + (Number(p.TotalPrice.toFixed(2)) ?? 0),
+			0
+		);
+		oModel.setProperty("/totalPrice", parseFloat(total.toFixed(2)));
+		oModel.refresh(true);
+
+		// 🔥 CRUCIAL: Update internal _selectedProducts list
+		this._selectedProducts = [...aProducts];
 	}
 }

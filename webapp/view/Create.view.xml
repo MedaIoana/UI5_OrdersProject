@@ -45,7 +45,8 @@
                                 <ToolbarSpacer />
                                 <SearchField
                                     width="50%"
-                                    search=".onSearchProducts"/>
+                                    search=".onSearchProducts"
+                                    id="searchproducts"/>
                             </Toolbar>
                         </headerToolbar>
                         <columns>
@@ -106,16 +107,19 @@
                                     <Label text="{i18n>OrderId}" />
                                     <Text text="{OrderID}" />
 
+                                    <Label text="{i18n>Customer}" />
+                                    <Text text="{customerData>/ContactName}" />
+
                                     <Label text="{i18n>Company}" />
                                     <Text text="{customerData>/CompanyName}" />
-
-                                    <Label text="{i18n>City}" />
-                                    <Text text="{customerData>/City}" />
 
                                     <!-- Customer Details -->
                                     <core:Title text="" />
                                     <Label text="{i18n>Country}" />
                                     <Text text="{customerData>/Country}" />
+
+                                    <Label text="{i18n>City}" />
+                                    <Text text="{customerData>/City}" />
 
                                     <Label text="{i18n>Phone}" />
                                     <Text text="{customerData>/Phone}" />
@@ -168,6 +172,9 @@
                                         </Column>
                                         <Column width="8rem">
                                             <Text text="{i18n>Quantity}" />
+                                        </Column>
+                                        <Column width="4rem">
+                                            <Text text="{i18n>Delete}" />
                                         </Column>
                                         <Column  width="8rem">
                                             <Text text="{i18n>totalPrice}" />

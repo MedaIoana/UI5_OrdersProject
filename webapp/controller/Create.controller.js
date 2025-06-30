@@ -24,7 +24,16 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-define(["require", "exports", "sap/m/ColumnListItem", "sap/m/StepInput", "sap/m/Text", "./BaseController", "sap/ui/model/Filter", "sap/ui/model/FilterOperator", "sap/ui/model/json/JSONModel", "sap/m/MessageBox"], function (require, exports, ColumnListItem_1, StepInput_1, Text_1, BaseController_1, Filter_1, FilterOperator_1, JSONModel_1, MessageBox_1) {
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
+define(["require", "exports", "sap/m/ColumnListItem", "sap/m/StepInput", "sap/m/Text", "./BaseController", "sap/ui/model/Filter", "sap/ui/model/FilterOperator", "sap/ui/model/json/JSONModel", "sap/m/MessageBox", "sap/m/Button"], function (require, exports, ColumnListItem_1, StepInput_1, Text_1, BaseController_1, Filter_1, FilterOperator_1, JSONModel_1, MessageBox_1, Button_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     /**
@@ -42,9 +51,6 @@ define(["require", "exports", "sap/m/ColumnListItem", "sap/m/StepInput", "sap/m/
             var _this = this;
             var oRouter = this.getRouter();
             oRouter.getRoute("create").attachMatched(this.onRouteMatched, this);
-            // Handle browser back button
-            // this._handleBackNavigationBound = this._handleBackNavigation.bind(this);
-            // window.addEventListener("popstate", this._handleBackNavigationBound);
             window.addEventListener("popstate", function (event) {
                 event.preventDefault();
                 // event.returnValue = "";
@@ -54,9 +60,6 @@ define(["require", "exports", "sap/m/ColumnListItem", "sap/m/StepInput", "sap/m/
             });
         };
         Create.prototype.onExit = function () {
-            // if (this._handleBackNavigationBound) {
-            // 	window.removeEventListener("popstate", this._handleBackNavigationBound);
-            // }
             console.log();
         };
         Create.prototype.onRouteMatched = function (oEvent) {
@@ -138,11 +141,41 @@ define(["require", "exports", "sap/m/ColumnListItem", "sap/m/StepInput", "sap/m/
                                     oProductsTable.removeSelections(true);
                                     oViewModel.setProperty("/step", iToIndex);
                                     _this._selectedProducts = [];
+                                    var oSearchField = _this.byId("searchproducts");
+                                    var oTable = _this.byId("selectProducts");
+                                    // Reset search input
+                                    oSearchField.setValue("");
+                                    // Clear any filters from the product table
+                                    var oBinding = oTable.getBinding("items");
+                                    if (oBinding) {
+                                        oBinding.filter([]);
+                                    }
                                     var oComboBox = _this.byId("selectCustomer");
                                     oComboBox.setSelectedKey("");
                                 }
                                 else if (iToIndex === 1) {
                                     oViewModel.setProperty("/step", iToIndex);
+                                    var oTable_1 = _this.byId("selectProducts");
+                                    var oSearchField = _this.byId("searchproducts");
+                                    // Reset search input
+                                    oSearchField.setValue("");
+                                    // Clear any filters from the product table
+                                    var oBinding = oTable_1.getBinding("items");
+                                    if (oBinding) {
+                                        oBinding.filter([]);
+                                    }
+                                    var aItems = oTable_1.getItems();
+                                    // Clear all selections first
+                                    oTable_1.removeSelections(true);
+                                    // Reselect only products that still exist in _selectedProducts
+                                    aItems.forEach(function (item) {
+                                        var context = item.getBindingContext();
+                                        var product = context === null || context === void 0 ? void 0 : context.getObject();
+                                        var isStillSelected = _this._selectedProducts.some(function (p) { return p.ProductID === product.ProductID; });
+                                        if (isStillSelected) {
+                                            oTable_1.setSelectedItem(item, true); // second param = fireEvent
+                                        }
+                                    });
                                 }
                             }
                         },
@@ -298,6 +331,11 @@ define(["require", "exports", "sap/m/ColumnListItem", "sap/m/StepInput", "sap/m/
                             max: "{viewModel>UnitsInStock}",
                             change: function (oEvent) { return _this._onQuantityChange(oEvent); },
                         }),
+                        new Button_1.default({
+                            icon: "sap-icon://delete",
+                            type: "Reject",
+                            press: function (oEvent) { return _this._onDeleteProduct(oEvent); },
+                        }),
                         new Text_1.default({
                             text: "{= (Number(${viewModel>UnitPrice} || 0) * Number(${viewModel>Quantity} || 0)).toFixed(2) + ' $'}",
                         }),
@@ -345,15 +383,6 @@ define(["require", "exports", "sap/m/ColumnListItem", "sap/m/StepInput", "sap/m/
                     }
                 },
             });
-            // };
-            // if (
-            // 	oResourceBundleOrPromise &&
-            // 	typeof (oResourceBundleOrPromise as Promise<any>).then === "function"
-            // ) {
-            // 	(oResourceBundleOrPromise as Promise<any>).then(handleConfirm);
-            // } else {
-            // 	handleConfirm(oResourceBundleOrPromise);
-            // }
         };
         Create.prototype.onSubmit = function () {
             var _this = this;
@@ -417,15 +446,6 @@ define(["require", "exports", "sap/m/ColumnListItem", "sap/m/StepInput", "sap/m/
             var oViewModelButtons = oView.getModel("viewModelButtons");
             var oResourceModel = this.getView().getModel("i18n");
             var oResourceBundleOrPromise = oResourceModel === null || oResourceModel === void 0 ? void 0 : oResourceModel.getResourceBundle();
-            //const handleConfirm = (oResourceBundle: any) => {
-            // MessageBox.confirm(
-            // 	oResourceBundleOrPromise?.getText("cancelConfirmationText"),
-            // 	{
-            // 		title: oResourceBundleOrPromise?.getText("cancelMessasgeBoxTitle"),
-            // 		actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
-            // 		emphasizedAction: MessageBox.Action.OK,
-            // 		onClose: (sAction: string) => {
-            // 			if (sAction === MessageBox.Action.OK) {
             oModel.remove(oView.getBindingContext().getPath(), {
                 success: function () {
                     console.log("Order deleted successfully.");
@@ -442,22 +462,23 @@ define(["require", "exports", "sap/m/ColumnListItem", "sap/m/StepInput", "sap/m/
                     console.log("Failed to delete order.");
                 },
             });
-            // 			} else {
-            // 				// Prevent going back if canceled
-            // 				history.pushState(null, "", location.href);
-            // 			}
-            // 		},
-            // 	}
-            // );
-            //};
-            // if (
-            // 	oResourceBundleOrPromise
-            // 	// typeof (oResourceBundleOrPromise as Promise<any>).then === "function"
-            // ) {
-            // 	(oResourceBundleOrPromise as Promise<any>).then(handleConfirm);
-            // } else {
-            // 	handleConfirm(oResourceBundleOrPromise);
-            // }
+        };
+        Create.prototype._onDeleteProduct = function (oEvent) {
+            var oButton = oEvent.getSource();
+            var oItem = oButton.getParent(); // ColumnListItem
+            var oContext = oItem.getBindingContext("viewModel");
+            var oProduct = oContext.getObject();
+            var oModel = this.getView().getModel("viewModel");
+            var aProducts = oModel.getProperty("/selectedProducts");
+            // Remove from model
+            aProducts = aProducts.filter(function (p) { return p.ProductID !== oProduct.ProductID; });
+            oModel.setProperty("/selectedProducts", aProducts);
+            // Recalculate total
+            var total = aProducts.reduce(function (sum, p) { var _a; return sum + ((_a = Number(p.TotalPrice.toFixed(2))) !== null && _a !== void 0 ? _a : 0); }, 0);
+            oModel.setProperty("/totalPrice", parseFloat(total.toFixed(2)));
+            oModel.refresh(true);
+            // 🔥 CRUCIAL: Update internal _selectedProducts list
+            this._selectedProducts = __spreadArray([], aProducts, true);
         };
         return Create;
     }(BaseController_1.default));

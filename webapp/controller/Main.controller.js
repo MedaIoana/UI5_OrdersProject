@@ -84,9 +84,44 @@ define(["require", "exports", "sap/m/MessageBox", "./BaseController", "sap/ui/mo
             var binding = list === null || list === void 0 ? void 0 : list.getBinding("items");
             binding === null || binding === void 0 ? void 0 : binding.filter(filter);
         };
+        // async onDeleteItems(event: Event): Promise<void> {
+        // 	const oTable = this.byId("ordersView") as Table;
+        // 	const oModel = this.getView().getModel() as ODataModel;
+        // 	const oSelected = oTable.getSelectedItems();
+        // 	const i18nModel = this.getView().getModel("i18n") as ResourceModel;
+        // 	const bundle = await i18nModel.getResourceBundle();
+        // 	if (oSelected.length === 0) {
+        // 		MessageBox.information(bundle.getText("NoSelection"));
+        // 		return;
+        // 	}
+        // 	const deletePromises = oSelected.map((oItem) => {
+        // 		const oContext = oItem.getBindingContext();
+        // 		if (!oContext) return Promise.resolve();
+        // 		const sPath = oContext.getPath();
+        // 		return new Promise<void>((resolve, reject) => {
+        // 			oModel.remove(sPath, {
+        // 				success: () => resolve(),
+        // 				error: (err: any) => reject({ path: sPath, error: err }),
+        // 			});
+        // 		});
+        // 	});
+        // 	Promise.allSettled(deletePromises).then((results) => {
+        // 		const failed = results.filter((r) => r.status === "rejected");
+        // 		const successCount = results.length - failed.length;
+        // 		if (successCount > 0) {
+        // 			MessageBox.success(bundle.getText("Deleted") + ` ${successCount}`);
+        // 		}
+        // 		if (failed.length > 0) {
+        // 			const failedPaths = failed.map((r: any) => r.reason.path).join(", ");
+        // 			MessageBox.error(bundle.getText("DeletedFailed") + `: ${failedPaths}`);
+        // 		}
+        // 		oTable.removeSelections();
+        // 		this.onSelectionChange();
+        // 	});
+        // }
         Main.prototype.onDeleteItems = function (event) {
             return __awaiter(this, void 0, void 0, function () {
-                var oTable, oModel, oSelected, i18nModel, bundle, deletePromises;
+                var oTable, oModel, oSelected, i18nModel, bundle;
                 var _this = this;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
@@ -102,30 +137,52 @@ define(["require", "exports", "sap/m/MessageBox", "./BaseController", "sap/ui/mo
                                 MessageBox_1.default.information(bundle.getText("NoSelection"));
                                 return [2 /*return*/];
                             }
-                            deletePromises = oSelected.map(function (oItem) {
-                                var oContext = oItem.getBindingContext();
-                                if (!oContext)
-                                    return Promise.resolve();
-                                var sPath = oContext.getPath();
-                                return new Promise(function (resolve, reject) {
-                                    oModel.remove(sPath, {
-                                        success: function () { return resolve(); },
-                                        error: function (err) { return reject({ path: sPath, error: err }); },
+                            // Ask for confirmation before deleting
+                            MessageBox_1.default.confirm(bundle.getText("DeleteConfirmation", [oSelected.length]), // e.g., "Are you sure you want to delete 3 items?"
+                            {
+                                title: bundle.getText("Confirm"),
+                                actions: [MessageBox_1.default.Action.OK, MessageBox_1.default.Action.CANCEL],
+                                emphasizedAction: MessageBox_1.default.Action.OK,
+                                onClose: function (sAction) { return __awaiter(_this, void 0, void 0, function () {
+                                    var deletePromises, results, failed, successCount, failedPaths;
+                                    return __generator(this, function (_a) {
+                                        switch (_a.label) {
+                                            case 0:
+                                                if (sAction !== MessageBox_1.default.Action.OK) {
+                                                    return [2 /*return*/];
+                                                }
+                                                deletePromises = oSelected.map(function (oItem) {
+                                                    var oContext = oItem.getBindingContext();
+                                                    if (!oContext)
+                                                        return Promise.resolve();
+                                                    var sPath = oContext.getPath();
+                                                    return new Promise(function (resolve, reject) {
+                                                        oModel.remove(sPath, {
+                                                            success: function () { return resolve(); },
+                                                            error: function (err) { return reject({ path: sPath, error: err }); },
+                                                        });
+                                                    });
+                                                });
+                                                return [4 /*yield*/, Promise.allSettled(deletePromises)];
+                                            case 1:
+                                                results = _a.sent();
+                                                failed = results.filter(function (r) { return r.status === "rejected"; });
+                                                successCount = results.length - failed.length;
+                                                if (successCount > 0) {
+                                                    MessageBox_1.default.success(bundle.getText("Deleted") + " ".concat(successCount));
+                                                }
+                                                if (failed.length > 0) {
+                                                    failedPaths = failed
+                                                        .map(function (r) { return r.reason.path; })
+                                                        .join(", ");
+                                                    MessageBox_1.default.error(bundle.getText("DeletedFailed") + ": ".concat(failedPaths));
+                                                }
+                                                oTable.removeSelections();
+                                                this.onSelectionChange();
+                                                return [2 /*return*/];
+                                        }
                                     });
-                                });
-                            });
-                            Promise.allSettled(deletePromises).then(function (results) {
-                                var failed = results.filter(function (r) { return r.status === "rejected"; });
-                                var successCount = results.length - failed.length;
-                                if (successCount > 0) {
-                                    MessageBox_1.default.success(bundle.getText("Deleted") + " ".concat(successCount));
-                                }
-                                if (failed.length > 0) {
-                                    var failedPaths = failed.map(function (r) { return r.reason.path; }).join(", ");
-                                    MessageBox_1.default.error(bundle.getText("DeletedFailed") + ": ".concat(failedPaths));
-                                }
-                                oTable.removeSelections();
-                                _this.onSelectionChange();
+                                }); },
                             });
                             return [2 /*return*/];
                     }

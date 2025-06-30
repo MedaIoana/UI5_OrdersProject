@@ -47,51 +47,6 @@ export default class Main extends BaseController {
 		binding?.filter(filter);
 	}
 
-	// async onDeleteItems(event: Event): Promise<void> {
-	// 	const oTable = this.byId("ordersView") as Table;
-	// 	const oModel = this.getView().getModel() as ODataModel;
-	// 	const oSelected = oTable.getSelectedItems();
-
-	// 	const i18nModel = this.getView().getModel("i18n") as ResourceModel;
-	// 	const bundle = await i18nModel.getResourceBundle();
-
-	// 	if (oSelected.length === 0) {
-	// 		MessageBox.information(bundle.getText("NoSelection"));
-	// 		return;
-	// 	}
-
-	// 	const deletePromises = oSelected.map((oItem) => {
-	// 		const oContext = oItem.getBindingContext();
-	// 		if (!oContext) return Promise.resolve();
-
-	// 		const sPath = oContext.getPath();
-
-	// 		return new Promise<void>((resolve, reject) => {
-	// 			oModel.remove(sPath, {
-	// 				success: () => resolve(),
-	// 				error: (err: any) => reject({ path: sPath, error: err }),
-	// 			});
-	// 		});
-	// 	});
-
-	// 	Promise.allSettled(deletePromises).then((results) => {
-	// 		const failed = results.filter((r) => r.status === "rejected");
-	// 		const successCount = results.length - failed.length;
-
-	// 		if (successCount > 0) {
-	// 			MessageBox.success(bundle.getText("Deleted") + ` ${successCount}`);
-	// 		}
-
-	// 		if (failed.length > 0) {
-	// 			const failedPaths = failed.map((r: any) => r.reason.path).join(", ");
-	// 			MessageBox.error(bundle.getText("DeletedFailed") + `: ${failedPaths}`);
-	// 		}
-
-	// 		oTable.removeSelections();
-	// 		this.onSelectionChange();
-	// 	});
-	// }
-
 	async onDeleteItems(event: Event): Promise<void> {
 		const oTable = this.byId("ordersView") as Table;
 		const oModel = this.getView().getModel() as ODataModel;
@@ -155,7 +110,7 @@ export default class Main extends BaseController {
 		);
 	}
 
-	onCreateItem(event: Event): void {
+	onCreateItem(): void {
 		const oRouter = UIComponent.getRouterFor(this);
 		oRouter.navTo("create");
 	}
@@ -179,7 +134,7 @@ export default class Main extends BaseController {
 		const oButton = this.byId("deleteButton") as Button;
 
 		if (oSelected.length > 0) {
-			oButton.setEnabled();
+			oButton.setEnabled(true);
 		} else {
 			oButton.setEnabled(false);
 		}

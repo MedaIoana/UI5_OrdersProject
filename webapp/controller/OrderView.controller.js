@@ -83,6 +83,28 @@ define(["require", "exports", "sap/ui/core/UIComponent", "sap/ui/core/routing/Hi
                 router.navTo("main", {}, true);
             }
         };
+        OrederView.prototype.onSearchProducts = function (event) {
+            // const oView = this.getView();
+            // const oModel = oView.getModel("orderDetailsModel") as ODataModel;
+            // build filter array
+            var filter = [];
+            var query = event.getParameter("query");
+            if (query) {
+                var filters = [
+                    new Filter_1.default("Product/ProductName", FilterOperator_1.default.Contains, query),
+                    new Filter_1.default("Product/Supplier/CompanyName", FilterOperator_1.default.Contains, query),
+                ];
+                // Combine filters using OR
+                filter.push(new Filter_1.default({
+                    filters: filters,
+                    and: false,
+                }));
+            }
+            // filter binding
+            var list = this.byId("idOrderDetailsTable");
+            var binding = list === null || list === void 0 ? void 0 : list.getBinding("items");
+            binding === null || binding === void 0 ? void 0 : binding.filter(filter);
+        };
         return OrederView;
     }(BaseController_1.default));
     exports.default = OrederView;
